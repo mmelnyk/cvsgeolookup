@@ -212,8 +212,16 @@ func (e *engine) Lookup(ip string) (lantitude float32, longtitude float32, err e
 
 		if e.records[current].end < look {
 			// move to right side
-			begin = current
+			if begin != current {
+				begin = current
+			} else {
+				begin = current + 1
+			}
 			continue
+		}
+
+		if begin > end {
+			break
 		}
 	}
 
