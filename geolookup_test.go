@@ -187,7 +187,11 @@ func TestBadLoadSpecial(t *testing.T) {
 
 func TestBasicLookup(t *testing.T) {
 	in := `start,end,lantitude,longtitude,skip
-10.0.0.0,10.255.255.255,-1.0,-1.0,yes
+10.0.0.0,10.49.255.255,-1.0,-1.0,yes
+10.50.0.0,10.99.255.255,-2.0,-2.0,yes
+10.100.0.0,10.149.255.255,-3.0,-3.0,yes
+10.150.0.0,10.199.255.255,-4.0,-4.0,yes
+10.200.0.0,10.255.255.255,-5.0,-5.0,yes
 20.0.0.0,20.255.255.255,1.0,1.0,no
 `
 	eng, err := New()
@@ -196,19 +200,13 @@ func TestBasicLookup(t *testing.T) {
 		t.Fatalf("Expected nil, but got %v", err)
 	}
 
-	lant, long, err := eng.Lookup("10.1.1.1")
-
-	if err != ErrNotInitialized {
-		t.Fatalf("Expected ErrNotInitialized, but got %v", err)
-	}
-
 	err = eng.Load(strings.NewReader(in))
 
 	if err != nil {
 		t.Fatalf("Expected nil, but got %v", err)
 	}
 
-	lant, long, err = eng.Lookup("10.1.1.1")
+	lant, long, err := eng.Lookup("10.1.1.1")
 
 	if err != nil {
 		t.Fatalf("Expected nil, but got %v", err)
@@ -249,6 +247,47 @@ func TestBasicLookup(t *testing.T) {
 	}
 }
 
+func TestBadLookup(t *testing.T) {
+	in := `start,end,lantitude,longtitude,skip
+10.0.0.0,10.49.255.255,-1.0,-1.0,yes
+10.50.0.0,10.99.255.255,-2.0,-2.0,yes
+10.100.0.0,10.149.255.255,-3.0,-3.0,yes
+10.150.0.0,10.199.255.255,-4.0,-4.0,yes
+10.200.0.0,10.255.255.255,-5.0,-5.0,yes
+20.0.0.0,20.255.255.255,1.0,1.0,no
+`
+	eng, err := New()
+
+	if err != nil {
+		t.Fatalf("Expected nil, but got %v", err)
+	}
+
+	_, _, err = eng.Lookup("10.1.1.1")
+
+	if err != ErrNotInitialized {
+		t.Fatalf("Expected ErrNotInitialized, but got %v", err)
+	}
+
+	err = eng.Load(strings.NewReader(in))
+
+	if err != nil {
+		t.Fatalf("Expected nil, but got %v", err)
+	}
+
+	_, _, err = eng.Lookup("10.0")
+
+	if err != ErrWrongIPFormat {
+		t.Fatalf("Expected ErrWrongIPFormat, but got %v", err)
+	}
+
+	_, _, err = eng.Lookup("test")
+
+	if err != ErrWrongIPFormat {
+		t.Fatalf("Expected ErrWrongIPFormat, but got %v", err)
+	}
+
+}
+
 func TestSkipLoad(t *testing.T) {
 	in := `start,end,lantitude,longtitude,skip
 10.0.0.0,10.255.255.255,-1.0,-1.0,yes
@@ -269,13 +308,13 @@ func TestSkipLoad(t *testing.T) {
 		t.Fatalf("Expected nil, but got %v", err)
 	}
 
-	lant, long, err := eng.Lookup("10.1.1.1")
+	_, _, err = eng.Lookup("10.1.1.1")
 
 	if err != ErrNotFound {
 		t.Fatalf("Expected ErrNotFound, but got %v", err)
 	}
 
-	lant, long, err = eng.Lookup("20.1.1.1")
+	lant, long, err := eng.Lookup("20.1.1.1")
 
 	if err != nil {
 		t.Fatalf("Expected nil, but got %v", err)
