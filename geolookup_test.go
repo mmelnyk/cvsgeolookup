@@ -176,6 +176,11 @@ func TestBadLoadSpecial(t *testing.T) {
 		t.Fatalf("Expected nil, but got %v", err)
 	}
 
+	err = eng.Load(nil)
+	if err != ErrReadInterfaceRequired {
+		t.Fatalf("Expected ErrReadInterfaceRequired, but got %v", err)
+	}
+
 	for i, v := range testcase {
 		err = eng.Load(strings.NewReader(v.in))
 
@@ -220,6 +225,20 @@ func TestBasicLookup(t *testing.T) {
 		t.Fatalf("Expected longtitude -1, but got %v", long)
 	}
 
+	lant, long, err = eng.Lookup("10.177.1.1")
+
+	if err != nil {
+		t.Fatalf("Expected nil, but got %v", err)
+	}
+
+	if lant != -4 {
+		t.Fatalf("Expected lantitude -1, but got %v", lant)
+	}
+
+	if long != -4 {
+		t.Fatalf("Expected longtitude -1, but got %v", long)
+	}
+
 	lant, long, err = eng.Lookup("20.1.1.1")
 
 	if err != nil {
@@ -234,13 +253,7 @@ func TestBasicLookup(t *testing.T) {
 		t.Fatalf("Expected longtitude 1, but got %v", long)
 	}
 
-	lant, long, err = eng.Lookup("20.1.1.1")
-
-	if err != nil {
-		t.Fatalf("Expected nil, but got %v", err)
-	}
-
-	lant, long, err = eng.Lookup("30.1.1.1")
+	_, _, err = eng.Lookup("30.1.1.1")
 
 	if err != ErrNotFound {
 		t.Fatalf("Expected ErrNotFound, but got %v", err)
@@ -328,13 +341,7 @@ func TestSkipLoad(t *testing.T) {
 		t.Fatalf("Expected longtitude 1, but got %v", long)
 	}
 
-	lant, long, err = eng.Lookup("20.1.1.1")
-
-	if err != nil {
-		t.Fatalf("Expected nil, but got %v", err)
-	}
-
-	lant, long, err = eng.Lookup("30.1.1.1")
+	_, _, err = eng.Lookup("30.1.1.1")
 
 	if err != ErrNotFound {
 		t.Fatalf("Expected ErrNotFound, but got %v", err)

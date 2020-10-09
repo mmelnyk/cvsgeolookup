@@ -3,7 +3,6 @@ package cvsgeolookup
 import (
 	"encoding/binary"
 	"encoding/csv"
-	"errors"
 	"io"
 	"net"
 	"sort"
@@ -53,9 +52,8 @@ func New(opts ...Option) (*engine, error) {
 }
 
 func (e *engine) Load(r io.Reader) error {
-
 	if r == nil {
-		return errors.New("Reader interface is required")
+		return ErrReadInterfaceRequired
 	}
 
 	data := csv.NewReader(r)
